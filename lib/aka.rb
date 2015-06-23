@@ -211,10 +211,10 @@ module Aka
     method_options :force => :boolean
     def list(args=nil)
       if args != nil
-        # showlast(args.to_i)
+        showlast(args.to_i)
       else
-        # value = readYML("#{Dir.home}/.aka/.config")["list"]
-        # showlast(value.to_i) #this is unsafe
+        value = readYML("#{Dir.home}/.aka/.config")["list"]
+        showlast(value.to_i) #this is unsafe
       end
 
       #total of #{} exports #functions
