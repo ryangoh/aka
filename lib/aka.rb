@@ -24,12 +24,11 @@ module Aka
     #
     # Demo testing
     #
-
     desc 'demo', 'To test out Thor'
-      def show()
-        puts "Demo success"
-      end
+    def show()
+      puts "Demo success"
     end
+
 
     #
     # DOWNLOAD
@@ -212,10 +211,10 @@ module Aka
     method_options :force => :boolean
     def list(args=nil)
       if args != nil
-        showlast(args.to_i)
+        # showlast(args.to_i)
       else
-        value = readYML("#{Dir.home}/.aka/.config")["list"]
-        showlast(value.to_i) #this is unsafe
+        # value = readYML("#{Dir.home}/.aka/.config")["list"]
+        # showlast(value.to_i) #this is unsafe
       end
 
       #total of #{} exports #functions
@@ -626,7 +625,15 @@ module Aka
     end
 
     # setup_aka
-    
+    def setup_aka
+        append_with_newline("export HISTSIZE=10000","/etc/profile")
+        trap = "sigusr2() { unalias $1;}
+  sigusr1() { source #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}; history -a; echo 'reloaded dot file'; }
+  trap sigusr1 SIGUSR1
+  trap 'sigusr2 $(cat ~/sigusr1-args)' SIGUSR2\n".pretty
+        append(trap, readYML("#{Dir.home}/.aka/.config")['profile'])
+      puts "Done. Please restart this shell.".red
+    end
 
     # write to location
     def write_to_location location, address
@@ -964,15 +971,4 @@ module Aka
     end
 
   end
-
-  class String
-    def pretty
-      return self.gsub("\s\t\r\f", ' ').squeeze(' ')
-    end
-
-    def is_i?
-      !!(self =~ /\A[-+]?[0-9]+\z/)
-    end
-  end
-
 end
