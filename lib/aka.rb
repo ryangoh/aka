@@ -1,4 +1,8 @@
 require "aka/version"
+require 'net/scp'
+require 'open-uri'
+require 'colorize'
+require "safe_yaml/load"
 require 'thor'
 
 module Aka
@@ -34,7 +38,7 @@ module Aka
     method_options :from => :string
     method_options :to => :string
     method_options :login => :string
-    def download 
+    def download
       if options.from and options.to and options.login
         success = true
         arr = split(options.login)
@@ -622,15 +626,7 @@ module Aka
     end
 
     # setup_aka
-    def setup_aka
-        append_with_newline("export HISTSIZE=10000","/etc/profile")
-        trap = "sigusr2() { unalias $1;}
-  sigusr1() { source #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}; history -a; echo 'reloaded dot file'; }
-  trap sigusr1 SIGUSR1
-  trap 'sigusr2 $(cat ~/sigusr1-args)' SIGUSR2\n".pretty
-        append(trap, readYML("#{Dir.home}/.aka/.config")['profile'])
-      puts "Done. Please restart this shell.".red
-    end
+    
 
     # write to location
     def write_to_location location, address
