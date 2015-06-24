@@ -949,7 +949,9 @@ module Aka
     def setBASHRC
       setPath("#{Dir.home}/.bashrc","dotfile")
       setPath("#{Dir.home}/.bash_history","history")
-      setPath("/etc/profile","profile")
+      #change by ryan
+      #setPath("/etc/profile","profile")
+      setPath("#{Dir.home}/.bashrc","profile")
     end
 
     def setBASH
