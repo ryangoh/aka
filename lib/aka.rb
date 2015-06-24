@@ -4,6 +4,7 @@ require 'open-uri'
 require 'colorize'
 require "safe_yaml/load"
 require 'thor'
+require 'fileutils'
 
 module Aka
   class Base < Thor
@@ -143,6 +144,15 @@ module Aka
     def setup
       setup_aka
     end
+
+
+    desc "setupconfig", "copy config file"
+    method_options :force => :boolean
+    def setupconfig
+      setup_config
+    end
+
+
 
     #
     # FIND
@@ -635,6 +645,14 @@ module Aka
       puts "Done. Please restart this shell.".red
     end
 
+    # setup config file
+    def setup_config
+      puts "#{Dir.pwd}/lib/.config"
+      fileDestination = "#{Dir.home}/.aka"
+      FileUtils::mkdir_p("#{fileDestination}") unless File.directory?(fileDestination)
+      FileUtils.cp("./lib/.config", "#{fileDestination}")
+    end
+
     # write to location
     def write_to_location location, address
       if aka_directory_exists?
@@ -971,6 +989,15 @@ module Aka
         return false
       end
     end
+
+    def isBashrc
+      if readYML("#{Dir.home}/.aka/.config")["dotfile"] == "#{Dir.home}/.bashrc"
+        return true
+      else
+        return false
+      end
+    end
+
 
   end
 end
