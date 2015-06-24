@@ -145,14 +145,21 @@ module Aka
       setup_aka
     end
 
-
+    #
+    # first step: set config file
+    #
     desc "setupconfig", "copy config file"
     method_options :force => :boolean
     def setupconfig
-      setup_config
+      configDir = "#{Dir.home}/.aka"
+      if File.exist?("#{configDir}/.config")
+        # list
+        puts "config file exist"
+      else
+        setup_config
+        setup_aka
+      end
     end
-
-
 
     #
     # FIND
@@ -636,21 +643,30 @@ module Aka
 
     # setup_aka
     def setup_aka
-        append_with_newline("export HISTSIZE=10000","/etc/profile")
+        if File.exist?("#{Dir.home}/.bashrc") #if bashrc exist
+          setBASHRC
+          append_with_newline("export HISTSIZE=10001","#{Dir.home}/.bashrc")
+        else
+          append_with_newline("export HISTSIZE=10000","/etc/profile")
+        end
+
         trap = "sigusr2() { unalias $1;}
   sigusr1() { source #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}; history -a; echo 'reloaded dot file'; }
   trap sigusr1 SIGUSR1
   trap 'sigusr2 $(cat ~/sigusr1-args)' SIGUSR2\n".pretty
         append(trap, readYML("#{Dir.home}/.aka/.config")['profile'])
-      puts "Done. Please restart this shell.".red
+        puts "Done. Please restart this shell.".red
     end
 
     # setup config file
     def setup_config
-      puts "#{Dir.pwd}/lib/.config"
-      fileDestination = "#{Dir.home}/.aka"
-      FileUtils::mkdir_p("#{fileDestination}") unless File.directory?(fileDestination)
-      FileUtils.cp("./lib/.config", "#{fileDestination}")
+      configDir = "#{Dir.home}/.aka"
+      if File.exist?("#{configDir}/.config")
+        puts "Directory #{configDir}/.config exist"
+      else
+        FileUtils::mkdir_p("#{configDir}")
+        FileUtils.cp("./lib/.config", "#{configDir}")
+      end
     end
 
     # write to location
@@ -967,9 +983,12 @@ module Aka
     def setBASHRC
       setPath("#{Dir.home}/.bashrc","dotfile")
       setPath("#{Dir.home}/.bash_history","history")
+
       #change by ryan
       #setPath("/etc/profile","profile")
       setPath("#{Dir.home}/.bashrc","profile")
+      #add home path
+      setPath("#{Dir.home}/.aka","home")
     end
 
     def setBASH
@@ -999,5 +1018,17 @@ module Aka
     end
 
 
+  end
+
+
+end
+
+class String
+  def pretty
+    return self.gsub("\s\t\r\f", ' ').squeeze(' ')
+  end
+
+  def is_i?
+    !!(self =~ /\A[-+]?[0-9]+\z/)
   end
 end
