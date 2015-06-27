@@ -10,7 +10,7 @@ module Aka
   class Base < Thor
     check_unknown_options!
     package_name "aka"
-    default_task :list
+    # default_task :list
     map "dl" => "download",
         "g" => "generate",
         "d" => "destroy",
@@ -154,10 +154,10 @@ module Aka
       configDir = "#{Dir.home}/.aka"
       if File.exist?("#{configDir}/.config")
         # list
-        puts "config file exist"
+        puts "config file is exist in #{configDir}"
       else
-        setup_config
-        setup_aka
+        setup_config #create and setup .config file
+        setup_aka    #setup aka
       end
     end
 
@@ -643,11 +643,19 @@ module Aka
 
     # setup_aka
     def setup_aka
-        if File.exist?("#{Dir.home}/.bashrc") #if bashrc exist
+        if File.exist?("#{Dir.home}/.zshrc") #if zshec exist
+          setZSHRC
+          append_with_newline("export HISTSIZE=10000","#{Dir.home}/.zshrc")
+        elsif
+          File.exist?("#{Dir.home}/.bashrc") #if bashrc exist
           setBASHRC
-          append_with_newline("export HISTSIZE=10001","#{Dir.home}/.bashrc")
+          append_with_newline("export HISTSIZE=10000","#{Dir.home}/.bashrc")
+        elsif File.exist?("#{Dir.home}/.bash_profile") #if bash_profile exist
+          setBASH
+          append_with_newline("export HISTSIZE=10000","#{Dir.home}/.bash_profile")
         else
-          append_with_newline("export HISTSIZE=10000","/etc/profile")
+          # append_with_newline("export HISTSIZE=10000","/etc/profile")
+          puts "Please create an issue/report to <TODO:>"
         end
 
         trap = "sigusr2() { unalias $1;}
@@ -658,7 +666,7 @@ module Aka
         puts "Done. Please restart this shell.".red
     end
 
-    # setup config file
+    # create and setup config file
     def setup_config
       configDir = "#{Dir.home}/.aka"
       if File.exist?("#{configDir}/.config")
@@ -977,7 +985,13 @@ module Aka
     def setZSHRC
       setPath("#{Dir.home}/.zshrc","dotfile")
       setPath("#{Dir.home}/.zsh_history","history")
-      setPath("/etc/zprofile","profile")
+
+      #change by ryan
+      # setPath("/etc/zprofile","profile")
+      setPath("#{Dir.home}/.zshrc","profile")
+
+      #add home path
+      setPath("#{Dir.home}/.aka","home")
     end
 
     def setBASHRC
@@ -987,6 +1001,7 @@ module Aka
       #change by ryan
       #setPath("/etc/profile","profile")
       setPath("#{Dir.home}/.bashrc","profile")
+
       #add home path
       setPath("#{Dir.home}/.aka","home")
     end
@@ -994,7 +1009,13 @@ module Aka
     def setBASH
       setPath("#{Dir.home}/.bash_profile","dotfile")
       setPath("#{Dir.home}/.bash_history","history")
-      setPath("/etc/profile","profile")
+
+      #change by ryan
+      # setPath("/etc/profile","profile")
+      setPath("#{Dir.home}/.bash_profile","profile")      
+
+      #add home path
+      setPath("#{Dir.home}/.aka","home")
     end
 
     def get_password
