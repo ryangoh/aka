@@ -10,7 +10,7 @@ module Aka
   class Base < Thor
     check_unknown_options!
     package_name "aka"
-    # default_task :list
+    default_task :list
     map "dl" => "download",
         "g" => "generate",
         "d" => "destroy",
@@ -1001,8 +1001,8 @@ module Aka
       setPath("#{Dir.home}/.bash_history","history")
 
       #change by ryan
-      # setPath("/etc/profile","profile")
-      setPath("#{Dir.home}/.bash_profile","profile")
+      setPath("/etc/profile","profile") #ryan assume mac can use etc profile
+      # setPath("#{Dir.home}/.bash_profile","profile")
 
       #add home path
       setPath("#{Dir.home}/.aka","home")
