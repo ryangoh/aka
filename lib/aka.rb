@@ -21,16 +21,6 @@ module Aka
         "e" => "edit",
         "c" => "clean"
 
-
-    #
-    # Demo testing
-    #
-    desc 'demo', 'To test out Thor'
-    def show()
-      puts "Demo success"
-    end
-
-
     #
     # DOWNLOAD
     # aka download --to ~/Desktop/ --login admin@162.243.249.154:22000 --from /home/admin/hello  desc "download [path]", "download a dot file"
@@ -1012,7 +1002,7 @@ module Aka
 
       #change by ryan
       # setPath("/etc/profile","profile")
-      setPath("#{Dir.home}/.bash_profile","profile")      
+      setPath("#{Dir.home}/.bash_profile","profile")
 
       #add home path
       setPath("#{Dir.home}/.aka","home")
