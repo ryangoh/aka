@@ -138,7 +138,7 @@ module Aka
     #
     # first step: set config file
     #
-    desc "setupconfig", "copy config file"
+    desc "setup2", "Gem - Setup aka"
     method_options :force => :boolean
     def setupconfig
       configDir = "#{Dir.home}/.aka"
@@ -147,7 +147,7 @@ module Aka
         puts "config file is exist in #{configDir}"
       else
         setup_config #create and setup .config file
-        setup_aka    #setup aka
+        setup_aka2    #setup aka
       end
     end
 
@@ -633,21 +633,32 @@ module Aka
 
     # setup_aka
     def setup_aka
+      append_with_newline("export HISTSIZE=10000","/etc/profile")
+      trap = "sigusr2() { unalias $1;}
+sigusr1() { source #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}; history -a; echo 'reloaded dot file'; }
+trap sigusr1 SIGUSR1
+trap 'sigusr2 $(cat ~/sigusr1-args)' SIGUSR2\n".pretty
+      append(trap, readYML("#{Dir.home}/.aka/.config")['profile'])
+    puts "Done. Please restart this shell.".red
+  end
+
+    # setup_aka2 by ryan - check bash file first
+    def setup_aka2
         if File.exist?("#{Dir.home}/.zshrc") #if zshec exist
-          setZSHRC
+          setZSHRC2
           append_with_newline("export HISTSIZE=10000","#{Dir.home}/.zshrc")
         elsif
           File.exist?("#{Dir.home}/.bashrc") #if bashrc exist
-          setBASHRC
+          setBASHRC2
           append_with_newline("export HISTSIZE=10000","#{Dir.home}/.bashrc")
         elsif File.exist?("#{Dir.home}/.bash_profile") #if bash_profile exist
-          setBASH
+          setBASH2
           append_with_newline("export HISTSIZE=10000","#{Dir.home}/.bash_profile")
         else
-          # append_with_newline("export HISTSIZE=10000","/etc/profile")
-          puts "Please create an issue/report to <TODO:>"
+          puts "Currently aka2 just support zshrc, bashrc and bash_profile"
+          puts "Pleaes contact aka2 creator for more info."
         end
-
+        
         trap = "sigusr2() { unalias $1;}
   sigusr1() { source #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}; history -a; echo 'reloaded dot file'; }
   trap sigusr1 SIGUSR1
@@ -898,6 +909,61 @@ module Aka
       return result + " #{percent.round(2)}%"
     end
 
+
+    # command :config do |c|
+    #   c.action do |args, options|
+    #     # theyml = Hash.new
+    #     # theyml["location"] = "~/.aka/.location"
+    #     # theyml["global"] = "/Users/ytbryan/.bash_profile"
+    #     # theyml["groups"] = "~/.aka/groups"
+    #     # theyml["remote"] = "255, admin, 12.12.12.233"
+    #     # theyml["path"] = "~/.aka"
+    #     # writeYML("#{Dir.home}/.aka/.config", theyml)
+    #     FileUtils.touch(readYML("#{Dir.home}/.aka/.config")["location"])
+    #   end
+    # end
+    #
+    # command :readconfig do |c|
+    #   c.action do |args, options|
+    #     puts "readYML('#{Dir.home}/.aka/.config')['location'] ->#{readYML("#{Dir.home}/.aka/.config")["location"].class} -> #{readYML("#{Dir.home}/.aka/.config")["location"]}"
+    #     puts "readYML("#{Dir.home}/.aka/.config")["location"] -> #{ readYML("#{Dir.home}/.aka/.config")["location"].class} -> #{ readYML("#{Dir.home}/.aka/.config")["location"]}"
+    #     puts "#{program(:path_to_location).class} -> #{program(:path_to_location)}"
+    #   end
+    # end
+    #
+
+    ###########################
+    ### DEVELOPMENT
+    ###########################
+
+    # command :build do |c|
+    #   c.syntax = 'aka build [options]'
+    #   c.summary = 'build the VERSION file and run tests'
+    #   c.action do |args, options|
+    #     write(program(:version), './VERSION')
+    #     puts "VERSION #{program(:version)} created at #{Time.now.strftime("%I:%M%p, %A, %d %b %Y")}"
+    #   end
+    # end
+
+    # command :install do |c|
+    #   c.syntax = 'aka copy [options]'
+    #   c.summary = 'copy a local copy of aka to /usr/local/bin'
+    #   c.action do |args, options|
+    #     result = system("sudo cp aka /usr/local/bin")
+    #     puts "Installed aka #{program(:version)} into /usr/local/bin (#{Time.now.strftime("%I:%M%p,%a,%d %b %Y")}).".red if result == true
+    #     puts "" if result == true
+    #   end
+    # end
+    #
+    # command :uninstall do |c|
+    #   c.syntax = 'aka uninstall [options]'
+    #   c.summary = 'uninstall aka'
+    #   c.action do |args, options|
+    #     input = ask "Confirm that you want to uninstall aka? (y/N)"
+    #     system("sudo rm -rf ~/.aka; sudo rm -rf /usr/local/bin/aka;") if input == "y"
+    #   end
+    # end
+
     def add_to_proj fullalias
       values = fullalias.split("=")
       yml = readYML("#{Dir.pwd}/.aka")
@@ -975,36 +1041,39 @@ module Aka
     def setZSHRC
       setPath("#{Dir.home}/.zshrc","dotfile")
       setPath("#{Dir.home}/.zsh_history","history")
-
-      #change by ryan
-      # setPath("/etc/zprofile","profile")
-      setPath("#{Dir.home}/.zshrc","profile")
-
-      #add home path
-      setPath("#{Dir.home}/.aka","home")
+      setPath("/etc/zprofile","profile")
     end
 
     def setBASHRC
       setPath("#{Dir.home}/.bashrc","dotfile")
       setPath("#{Dir.home}/.bash_history","history")
-
-      #change by ryan
-      #setPath("/etc/profile","profile")
-      setPath("#{Dir.home}/.bashrc","profile")
-
-      #add home path
-      setPath("#{Dir.home}/.aka","home")
+      setPath("/etc/profile","profile")
     end
 
     def setBASH
       setPath("#{Dir.home}/.bash_profile","dotfile")
       setPath("#{Dir.home}/.bash_history","history")
+      setPath("/etc/profile","profile")
+    end
 
-      #change by ryan
-      setPath("/etc/profile","profile") #ryan assume mac can use etc profile
-      # setPath("#{Dir.home}/.bash_profile","profile")
+    def setZSHRC2 #ryan - set the right dotfile and profile
+      setPath("#{Dir.home}/.zshrc","dotfile")
+      setPath("#{Dir.home}/.zsh_history","history")
+      setPath("#{Dir.home}/.zshrc","profile")
+      setPath("#{Dir.home}/.aka","home")
+    end
 
-      #add home path
+    def setBASHRC2 #ryan - set the right dotfile and profile
+      setPath("#{Dir.home}/.bashrc","dotfile")
+      setPath("#{Dir.home}/.bash_history","history")
+      setPath("#{Dir.home}/.bashrc","profile")
+      setPath("#{Dir.home}/.aka","home")
+    end
+
+    def setBASH2 #ryan - set the right dotfile and profile
+      setPath("#{Dir.home}/.bash_profile","dotfile")
+      setPath("#{Dir.home}/.bash_history","history")
+      setPath("/etc/profile","profile")
       setPath("#{Dir.home}/.aka","home")
     end
 
@@ -1014,14 +1083,6 @@ module Aka
 
     def isOhMyZsh
       if readYML("#{Dir.home}/.aka/.config")["dotfile"] == "#{Dir.home}/.zshrc"
-        return true
-      else
-        return false
-      end
-    end
-
-    def isBashrc
-      if readYML("#{Dir.home}/.aka/.config")["dotfile"] == "#{Dir.home}/.bashrc"
         return true
       else
         return false
