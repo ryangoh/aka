@@ -228,7 +228,25 @@ module Aka
       #total of #{} exports #functions
       puts "A total of #{count()} aliases,#{count_export} exports and #{count_function} functions from #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}"
       reload_dot_file
-      puts "\nFor a list of helpful commands, type aka2 -h"
+    end
+
+    #
+    # LIST OUT - ryan - remove numbering
+    #
+    desc "list2", "list alias (short alias: l)"
+    method_options :force => :boolean
+    def list2(args=nil)
+      if args != nil
+        showlast2(args.to_i)
+      else
+        value = readYML("#{Dir.home}/.aka/.config")["list"]
+        showlast2(value.to_i) #this is unsafe
+      end
+
+      #total of #{} exports #functions
+      puts "A total of #{count()} aliases,#{count_export} exports and #{count_function} functions from #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}"
+      reload_dot_file
+      puts "\nFor a list of helpful commands, type aka2 -h\n\n"
     end
 
     #
@@ -258,6 +276,35 @@ module Aka
         puts "clear the dot history file"
       end
     end
+
+    #
+    # USAGE2 - ryan - remove numbering in front
+    #
+    desc "usage2 [number]", "show commands usage based on history"
+    # method_options :least, :type => :boolean, :aliases => '-l', :desc => 'show the least used commands'
+    # method_options :clear, :type => :boolean, :aliases => '-c', :desc => 'clear the dot history file'
+    def usage2(args=nil)
+      if args
+        if options.least
+          showUsage(args.to_i, true) if args
+        else
+          showUsage(args.to_i) if args
+        end
+      else
+        if options.least
+          value = readYML("#{Dir.home}/.aka/.config")["usage"]
+          showlast2(value.to_i, true) #this is unsafe
+        else
+          value = readYML("#{Dir.home}/.aka/.config")["usage"]
+          showlast2(value.to_i) #this is unsafe
+        end
+      end
+
+      if options[:clear]
+        puts "clear the dot history file"
+      end
+    end
+
 
     #
     # INSTALL
@@ -751,6 +798,39 @@ trap 'sigusr2 $(cat ~/sigusr1-args)' SIGUSR2\n".pretty
             splitted= line.split('=')
             # puts "#{index+1}. " + splitted[0] + "=" + splitted[1].red
             puts "#{index+1}. aka g " + splitted[0].split(" ")[1] + "=" + splitted[1].red
+          end
+        end
+        puts ""
+      end
+    end
+
+    # show last2 - ryan - remove number
+    def showlast2 howmany=10
+      str = checkConfigFile(readYML("#{Dir.home}/.aka/.config")["dotfile"])
+
+      if content = File.open(str).read
+        content.gsub!(/\r\n?/, "\n")
+        content_array = content.split("\n")
+        #why not just call the last five lines? Because i can't be sure that they are aliases
+        total_aliases = []
+        content_array.each_with_index { |line, index|
+          value = line.split(" ")
+          if value.length > 1 and value.first == "alias"
+            total_aliases.push(line)
+          end
+        }
+        puts ""
+        if total_aliases.count > howmany
+          total_aliases.last(howmany).each_with_index do |line, index|
+            splitted= line.split('=')
+            puts "aka g " + splitted[0].split(" ")[1] + "=" + splitted[1].red
+            # puts "#{total_aliases.count - howmany + index+1}. " + splitted[0] + "=" + splitted[1].red
+          end
+        else
+          total_aliases.last(howmany).each_with_index do |line, index|
+            splitted= line.split('=')
+            # puts "#{index+1}. " + splitted[0] + "=" + splitted[1].red
+            puts "aka g " + splitted[0].split(" ")[1] + "=" + splitted[1].red
           end
         end
         puts ""
