@@ -19,7 +19,8 @@ module Aka
         "u" => "usage",
         "l" => "list",
         "e" => "edit",
-        "c" => "clean"
+        "c" => "clean",
+        "h" => "help"
 
     #
     # DOWNLOAD
@@ -227,6 +228,7 @@ module Aka
       #total of #{} exports #functions
       puts "A total of #{count()} aliases,#{count_export} exports and #{count_function} functions from #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}"
       reload_dot_file
+      puts "\nFor a list of helpful commands, type aka2 -h"
     end
 
     #
@@ -658,7 +660,7 @@ trap 'sigusr2 $(cat ~/sigusr1-args)' SIGUSR2\n".pretty
           puts "Currently aka2 just support zshrc, bashrc and bash_profile"
           puts "Pleaes contact aka2 creator for more info."
         end
-        
+
         trap = "sigusr2() { unalias $1;}
   sigusr1() { source #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}; history -a; echo 'reloaded dot file'; }
   trap sigusr1 SIGUSR1
