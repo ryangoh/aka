@@ -246,7 +246,7 @@ module Aka
       #total of #{} exports #functions
       puts "A total of #{count()} aliases,#{count_export} exports and #{count_function} functions from #{readYML("#{Dir.home}/.aka/.config")["dotfile"]}"
       reload_dot_file
-      puts "\nFor a list of helpful commands, type aka2 -h\n\n"
+      puts "\nUse 'aka -h' to see all the useful commands.\n\n"
     end
 
     #
